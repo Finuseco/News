@@ -106,4 +106,21 @@ INSERT INTO section_translations (section_id, language_code, name)
 SELECT s.id, 'en', t.name_en FROM tmp_sections t JOIN sections s ON s.slug = t.slug
 ON CONFLICT (section_id, language_code) DO NOTHING;
 
+-- ---------------------------------------------------------------------
+-- Réglages du site (modifiables ensuite par l'administrateur)
+-- Aucun prix n'est fixé ici : c'est à l'administrateur de les définir.
+-- ---------------------------------------------------------------------
+INSERT INTO site_settings (key, value, description) VALUES
+  ('require_four_eyes',    'true'::jsonb,
+   'Un contenu doit être vérifié par une autre personne que son auteur ou celui qui l''a soumis'),
+  ('premium_preview_chars', '600'::jsonb,
+   'Longueur (en caractères) de l''extrait gratuit d''un article premium, si l''auteur n''en a pas écrit un'),
+  ('purchase_access_days', 'null'::jsonb,
+   'Durée de l''accès après un achat, en jours. null = accès illimité'),
+  ('default_currency',     '"USD"'::jsonb,
+   'Devise des prix par défaut (CashPay cite USD dans sa documentation)'),
+  ('default_price_amount', 'null'::jsonb,
+   'Prix par défaut d''un contenu premium sans prix propre. À définir par l''administrateur')
+ON CONFLICT (key) DO NOTHING;
+
 COMMIT;
