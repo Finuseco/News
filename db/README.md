@@ -7,7 +7,7 @@ Base unique pour le site, l'API et l'application Android.
 ```bash
 createdb news
 psql news -f db/schema.sql   # tables, index, vues, fonctions, règles
-psql news -f db/seed.sql     # langues, pays, rubriques, réglages (relançable sans doublons)
+psql news -f db/seed.sql     # langues, continents, pays, catégories, réglages (relançable sans doublons)
 ```
 
 Testé sur PostgreSQL 16. Les extensions `pgcrypto`, `citext`, `pg_trgm`, `unaccent` et `btree_gist` sont fournies avec le paquet `postgresql-contrib`.
@@ -85,10 +85,29 @@ D'après la documentation de developer.cashpay-all.com :
 
 Points de la documentation CashPay à confirmer avant de coder cette partie : la liste complète des statuts de transaction (seuls `completed` et `failed` sont documentés), l'URL de rappel des webhooks (`callbackUrl` n'apparaît pas dans l'exemple du Hosted Checkout), le moyen de retrouver une transaction par la suite et le bac à sable de test.
 
+## Classer un contenu : pays, continent et catégorie
+
+Chaque article et chaque vidéo a **un lieu** et **une catégorie** (domaine), choisis par l'auteur à la rédaction. Les deux sont obligatoires pour soumettre.
+
+- **Continents** (`continents`) : Afrique, Amériques, Asie-Pacifique, Europe, Moyen-Orient.
+- **Pays** (`countries`) : 198 pays, chacun rattaché à un seul continent. L'arbre complet « continent > pays » s'obtient en un appel, pratique pour le formulaire de publication et l'application Android :
+  ```sql
+  SELECT geo_tree('fr');   -- ou 'en'
+  -- [{"code":"afrique","name":"Afrique","countries":[{"code":"CD","name":"RD Congo"}, ...]}, ...]
+  ```
+  Le continent d'un contenu se déduit tout seul du pays choisi.
+- **Lieu d'un contenu** (`geo_scope`) : `country` (un pays, par défaut), `continent` (tout un continent, par exemple l'Union africaine) ou `world` (international, sans pays). D'autres pays concernés peuvent s'ajouter dans `article_countries`.
+- **Catégories** (`sections`) : Actualité, Politique, Économie, Société, Diplomatie, Justice, Environnement, Santé, Sciences et Technologies, Éducation, Culture, Sport, Médias, Opinions. Elles sont indépendantes du lieu : « Économie » + « RD Congo » donne un article d'économie sur la RD Congo. Les noms existent en plusieurs langues (`section_translations`) et des sous-catégories sont possibles avec `parent_id`.
+- **Pour l'API** : filtrer `v_published_articles` et `v_published_episodes` par `continent_code`, `country_code` et `section_id`.
+- **Modifiable sans code** : le regroupement par continent est une convention éditoriale (Égypte et Maghreb en Afrique, Turquie et Iran au Moyen-Orient, Caucase et Russie en Europe, Asie centrale et Océanie en Asie-Pacifique). Pour changer un pays de continent, ses contenus suivent automatiquement :
+  ```sql
+  UPDATE countries SET continent_code = 'europe' WHERE code = 'TR';
+  ```
+
 ## Vidéos, YouTube et chaînes
 
 - **Vidéo filmée** : un `media_assets` (`provider = 'upload'`) relié à un épisode. Le champ `processing_status` suit son traitement (conversion HLS par exemple).
-- **Chaînes YouTube synchronisées** : `youtube_channels` décrit la chaîne et sa fréquence de synchronisation ; chaque vidéo importée devient un média (`provider = 'youtube'`, une même vidéo ne peut pas être importée deux fois) et un épisode relié à sa chaîne. Les vidéos importées suivent le circuit de publication, sauf si `auto_publish` est activé. Les directs YouTube peuvent aussi être importés (`sync_lives`).
+- **Chaînes YouTube synchronisées** : `youtube_channels` décrit la chaîne et sa fréquence de synchronisation ; chaque vidéo importée devient un média (`provider = 'youtube'`, une même vidéo ne peut pas être importée deux fois) et un épisode relié à sa chaîne. Les vidéos importées suivent le circuit de publication, sauf si `auto_publish` est activé : le job de synchronisation doit alors utiliser `SET LOCAL app.bypass_workflow = 'on'` et renseigner lui-même `published_at`. `default_section_id` et `default_country_code` donnent à ces vidéos leur catégorie et leur pays. Les directs YouTube peuvent aussi être importés (`sync_lives`).
 - **Chaînes et lives** : `channels` distingue nos chaînes (`own`), les partenaires comme une chaîne TNT (`partner`) et les chaînes tierces ajoutées à l'application (`external`). Chaque chaîne peut avoir plusieurs flux (`live_streams`) dont un flux principal, et un guide des programmes (`epg_entries`) sans chevauchement possible.
 - **Connecter un média ou une chaîne TNT** : créer un `media_partners`, puis une `ingestion_sources` (RSS, API JSON, XMLTV ou YouTube). Les éléments récupérés sont gardés bruts dans `ingested_items` avant d'être transformés.
 
@@ -96,9 +115,9 @@ Points de la documentation CashPay à confirmer avant de coder cette partie : la
 
 | Domaine | Tables |
 |---|---|
-| Référentiels | `languages`, `countries` |
+| Référentiels | `languages`, `continents`, `countries` |
 | Comptes et accès | `users`, `user_roles`, `refresh_tokens`, `api_clients`, `site_settings`, `audit_log` |
-| Rédaction | `authors`, `sections`, `section_translations`, `tags` |
+| Rédaction | `authors`, `sections` (catégories), `section_translations`, `tags` |
 | Articles | `articles`, `article_authors`, `article_tags`, `article_countries`, `article_media`, `article_related`, `article_revisions` |
 | Vidéo et audio | `programs`, `episodes`, `episode_authors`, `episode_tags`, `media_assets`, `media_subtitles` |
 | Lecteurs | `bookmarks`, `section_follows`, `comments` |

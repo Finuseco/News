@@ -1,7 +1,8 @@
 -- =====================================================================
 -- News Platform : schéma PostgreSQL
 -- Plateforme d'actualité média (type RFI / France 24) :
---   * articles multilingues, rubriques, tags, auteurs (signature)
+--   * articles multilingues, classés par continent > pays et par catégorie (domaine),
+--     tags, auteurs (signature)
 --   * équipe : administrateurs, modérateurs, auteurs, relecteurs, publicateurs
 --   * circuit de publication : l'auteur soumet, un autre vérifie, puis on publie
 --   * contenus gratuits ou premium (extrait, puis paiement CashPay)
@@ -47,6 +48,9 @@ CREATE TYPE content_status AS ENUM (
   'draft', 'submitted', 'changes_requested', 'approved', 'scheduled', 'published', 'archived'
 );
 CREATE TYPE access_level AS ENUM ('free', 'premium');
+
+-- Portée géographique d'un contenu : un pays, tout un continent, ou le monde entier
+CREATE TYPE geo_scope AS ENUM ('country', 'continent', 'world');
 
 CREATE TYPE article_kind        AS ENUM ('article', 'brief', 'dossier', 'reportage', 'interview', 'opinion', 'live_blog');
 CREATE TYPE media_kind          AS ENUM ('image', 'video', 'audio', 'document');
@@ -96,12 +100,28 @@ CREATE TABLE languages (
   search_config regconfig NOT NULL DEFAULT 'simple'   -- configuration de recherche plein texte
 );
 
-CREATE TABLE countries (
-  code      char(2) PRIMARY KEY CHECK (code = upper(code)),
+-- Continents (régions du monde) : Afrique, Amériques, Asie-Pacifique, Europe, Moyen-Orient.
+-- Le regroupement suit celui des grands médias internationaux comme RFI.
+-- `names` accueille les noms dans les autres langues, ex. {"sw": "Afrika"}.
+CREATE TABLE continents (
+  code      text PRIMARY KEY CHECK (code ~ '^[a-z]+(-[a-z]+)*$'),   -- sert aussi dans les adresses
   name_fr   text NOT NULL,
   name_en   text NOT NULL,
-  continent text
+  names     jsonb NOT NULL DEFAULT '{}',
+  position  integer NOT NULL DEFAULT 0,
+  is_active boolean NOT NULL DEFAULT true
 );
+
+-- Chaque pays appartient à un seul continent (modifiable par l'administrateur)
+CREATE TABLE countries (
+  code           char(2) PRIMARY KEY CHECK (code = upper(code)),
+  continent_code text NOT NULL REFERENCES continents(code) ON UPDATE CASCADE,
+  name_fr        text NOT NULL,
+  name_en        text NOT NULL,
+  names          jsonb NOT NULL DEFAULT '{}',
+  is_active      boolean NOT NULL DEFAULT true
+);
+CREATE INDEX idx_countries_continent ON countries (continent_code) WHERE is_active;
 
 -- =====================================================================
 -- 2. UTILISATEURS, RÔLES, SESSIONS, ACCÈS API, RÉGLAGES
@@ -327,6 +347,7 @@ CREATE TABLE youtube_channels (
   channel_id              uuid REFERENCES channels(id) ON DELETE SET NULL,
   language_code           text REFERENCES languages(code),
   default_section_id      integer REFERENCES sections(id) ON DELETE SET NULL,
+  default_country_code    char(2) REFERENCES countries(code),   -- pays attribué aux vidéos importées
   sync_enabled            boolean NOT NULL DEFAULT true,
   sync_lives              boolean NOT NULL DEFAULT false,   -- importer aussi les directs YouTube
   -- true : le job fait passer les vidéos importées jusqu'à la publication sans relecture humaine
@@ -357,7 +378,13 @@ CREATE TABLE articles (
   summary              text,                      -- chapô
   body                 text NOT NULL DEFAULT '',  -- contenu complet (Markdown ou HTML)
   cover_media_id       uuid REFERENCES media_assets(id) ON DELETE SET NULL,
+  -- Catégorie (domaine : politique, économie...) : obligatoire pour soumettre
   section_id           integer REFERENCES sections(id) ON DELETE SET NULL,
+  -- Où : le pays concerné (le continent s'en déduit tout seul), ou tout un continent,
+  -- ou le monde. D'autres pays secondaires peuvent s'ajouter dans article_countries.
+  geo_scope            geo_scope NOT NULL DEFAULT 'country',
+  country_code         char(2) REFERENCES countries(code),
+  continent_code       text REFERENCES continents(code) ON UPDATE CASCADE,
   -- Circuit de publication (rempli automatiquement par la base)
   status               content_status NOT NULL DEFAULT 'draft',
   submitted_by         uuid REFERENCES users(id) ON DELETE SET NULL,
@@ -394,11 +421,17 @@ CREATE TABLE articles (
   CONSTRAINT articles_published_has_date CHECK (status <> 'published' OR published_at IS NOT NULL),
   CONSTRAINT articles_scheduled_has_date CHECK (status <> 'scheduled' OR scheduled_at IS NOT NULL),
   CONSTRAINT articles_price_pair         CHECK ((price_amount IS NULL) = (price_currency IS NULL)),
-  CONSTRAINT articles_free_has_no_price  CHECK (access_level = 'premium' OR price_amount IS NULL)
+  CONSTRAINT articles_free_has_no_price  CHECK (access_level = 'premium' OR price_amount IS NULL),
+  CONSTRAINT articles_geo_consistent     CHECK (
+       (geo_scope = 'world'     AND country_code IS NULL AND continent_code IS NULL)
+    OR (geo_scope = 'continent' AND country_code IS NULL)
+    OR  geo_scope = 'country')
 );
 
 CREATE INDEX idx_articles_lang_pub     ON articles (language_code, published_at DESC) WHERE status = 'published';
 CREATE INDEX idx_articles_section_pub  ON articles (section_id, published_at DESC)    WHERE status = 'published';
+CREATE INDEX idx_articles_country_pub  ON articles (country_code, published_at DESC)   WHERE status = 'published';
+CREATE INDEX idx_articles_continent_pub ON articles (continent_code, published_at DESC) WHERE status = 'published';
 CREATE INDEX idx_articles_status       ON articles (status, updated_at DESC);
 CREATE INDEX idx_articles_review_queue ON articles (submitted_at)  WHERE status = 'submitted';
 CREATE INDEX idx_articles_publish_queue ON articles (approved_at)  WHERE status = 'approved';
@@ -540,7 +573,10 @@ CREATE TABLE episodes (
   slug              text NOT NULL,
   description       text,
   media_id          uuid REFERENCES media_assets(id) ON DELETE SET NULL,   -- vidéo complète
-  section_id        integer REFERENCES sections(id) ON DELETE SET NULL,
+  section_id        integer REFERENCES sections(id) ON DELETE SET NULL,    -- catégorie (domaine)
+  geo_scope         geo_scope NOT NULL DEFAULT 'country',                  -- même logique que les articles
+  country_code      char(2) REFERENCES countries(code),
+  continent_code    text REFERENCES continents(code) ON UPDATE CASCADE,
   article_id        uuid REFERENCES articles(id) ON DELETE SET NULL,       -- article lié éventuel
   youtube_channel_id uuid REFERENCES youtube_channels(id) ON DELETE SET NULL,  -- si importé de YouTube
   status            content_status NOT NULL DEFAULT 'draft',
@@ -571,11 +607,17 @@ CREATE TABLE episodes (
   CONSTRAINT episodes_published_has_date CHECK (status <> 'published' OR published_at IS NOT NULL),
   CONSTRAINT episodes_scheduled_has_date CHECK (status <> 'scheduled' OR scheduled_at IS NOT NULL),
   CONSTRAINT episodes_price_pair         CHECK ((price_amount IS NULL) = (price_currency IS NULL)),
-  CONSTRAINT episodes_free_has_no_price  CHECK (access_level = 'premium' OR price_amount IS NULL)
+  CONSTRAINT episodes_free_has_no_price  CHECK (access_level = 'premium' OR price_amount IS NULL),
+  CONSTRAINT episodes_geo_consistent     CHECK (
+       (geo_scope = 'world'     AND country_code IS NULL AND continent_code IS NULL)
+    OR (geo_scope = 'continent' AND country_code IS NULL)
+    OR  geo_scope = 'country')
 );
 CREATE INDEX idx_episodes_pub     ON episodes (language_code, kind, published_at DESC) WHERE status = 'published';
 CREATE INDEX idx_episodes_program ON episodes (program_id, published_at DESC);
 CREATE INDEX idx_episodes_section ON episodes (section_id, published_at DESC) WHERE status = 'published';
+CREATE INDEX idx_episodes_country   ON episodes (country_code, published_at DESC)   WHERE status = 'published';
+CREATE INDEX idx_episodes_continent ON episodes (continent_code, published_at DESC) WHERE status = 'published';
 CREATE INDEX idx_episodes_review_queue ON episodes (submitted_at) WHERE status = 'submitted';
 CREATE INDEX idx_episodes_scheduled    ON episodes (scheduled_at) WHERE status = 'scheduled';
 CREATE INDEX idx_episodes_youtube ON episodes (youtube_channel_id) WHERE youtube_channel_id IS NOT NULL;
@@ -653,6 +695,7 @@ CREATE TABLE ingestion_sources (
   endpoint_url           text,
   language_code          text REFERENCES languages(code),
   default_section_id     integer REFERENCES sections(id) ON DELETE SET NULL,
+  default_country_code   char(2) REFERENCES countries(code),   -- pays attribué aux contenus importés
   channel_id             uuid REFERENCES channels(id) ON DELETE SET NULL,   -- pour les flux EPG
   config                 jsonb NOT NULL DEFAULT '{}',   -- en-têtes, mapping des champs...
   fetch_interval_minutes integer NOT NULL DEFAULT 15 CHECK (fetch_interval_minutes > 0),
@@ -1049,6 +1092,18 @@ BEGIN
     END IF;
   END IF;
 
+  -- Classement obligatoire avant la soumission : catégorie (domaine) et lieu (pays, continent ou monde)
+  IF NEW.status = 'submitted' THEN
+    IF NEW.section_id IS NULL THEN
+      RAISE EXCEPTION 'Choisissez la catégorie (domaine) du contenu avant de le soumettre' USING ERRCODE = '23514';
+    END IF;
+    IF (NEW.geo_scope = 'country'   AND NEW.country_code   IS NULL)
+    OR (NEW.geo_scope = 'continent' AND NEW.continent_code IS NULL) THEN
+      RAISE EXCEPTION 'Choisissez le pays concerné (ou le continent, ou « monde ») avant de soumettre'
+        USING ERRCODE = '23514';
+    END IF;
+  END IF;
+
   IF NEW.status = 'changes_requested' AND actor IS NOT NULL AND cmt IS NULL THEN
     RAISE EXCEPTION 'Un commentaire est obligatoire pour demander des corrections' USING ERRCODE = '23514';
   END IF;
@@ -1135,6 +1190,51 @@ CREATE TRIGGER trg_articles_default_author
 CREATE TRIGGER trg_episodes_default_author
   AFTER INSERT ON episodes
   FOR EACH ROW EXECUTE FUNCTION default_content_author();
+
+-- ---- Lieu du contenu : le continent se déduit du pays ----------------
+--   * portée « pays »      : le continent est celui du pays choisi
+--   * portée « continent » : on choisit le continent, pas de pays
+--   * portée « monde »     : ni pays ni continent
+CREATE OR REPLACE FUNCTION content_geo_guard() RETURNS trigger AS $$
+BEGIN
+  IF NEW.geo_scope = 'world' THEN
+    NEW.country_code   := NULL;
+    NEW.continent_code := NULL;
+  ELSIF NEW.geo_scope = 'continent' THEN
+    NEW.country_code := NULL;
+  ELSIF NEW.country_code IS NOT NULL THEN
+    SELECT continent_code INTO NEW.continent_code FROM countries WHERE code = NEW.country_code;
+  ELSE
+    NEW.continent_code := NULL;
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Les triggers se déclenchent dans l'ordre alphabétique : « geo » passe avant « workflow »
+CREATE TRIGGER trg_articles_geo
+  BEFORE INSERT OR UPDATE OF geo_scope, country_code, continent_code ON articles
+  FOR EACH ROW EXECUTE FUNCTION content_geo_guard();
+
+CREATE TRIGGER trg_episodes_geo
+  BEFORE INSERT OR UPDATE OF geo_scope, country_code, continent_code ON episodes
+  FOR EACH ROW EXECUTE FUNCTION content_geo_guard();
+
+-- Si l'administrateur change un pays de continent, ses contenus suivent
+CREATE OR REPLACE FUNCTION countries_continent_changed() RETURNS trigger AS $$
+BEGIN
+  UPDATE articles SET continent_code = NEW.continent_code
+   WHERE country_code = NEW.code AND geo_scope = 'country';
+  UPDATE episodes SET continent_code = NEW.continent_code
+   WHERE country_code = NEW.code AND geo_scope = 'country';
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_countries_continent
+  AFTER UPDATE OF continent_code ON countries
+  FOR EACH ROW WHEN (OLD.continent_code IS DISTINCT FROM NEW.continent_code)
+  EXECUTE FUNCTION countries_continent_changed();
 
 -- ---- Monétisation : réservée à l'administrateur ---------------------
 CREATE OR REPLACE FUNCTION monetization_guard() RETURNS trigger AS $$
@@ -1312,7 +1412,8 @@ END $$;
 -- Articles visibles par le public, avec la signature (auteurs)
 CREATE VIEW v_published_articles AS
 SELECT a.id, a.translation_group_id, a.language_code, a.kind, a.title, a.slug,
-       a.subtitle, a.summary, a.cover_media_id, a.section_id, a.published_at,
+       a.subtitle, a.summary, a.cover_media_id, a.section_id,
+       a.geo_scope, a.country_code, a.continent_code, a.published_at,
        a.is_breaking, a.is_featured, a.allow_comments, a.reading_time_min,
        a.view_count, a.source_name, a.access_level, a.price_amount, a.price_currency,
        a.created_at, a.updated_at,
@@ -1326,7 +1427,8 @@ SELECT a.id, a.translation_group_id, a.language_code, a.kind, a.title, a.slug,
 -- Épisodes (vidéos et audios) visibles par le public, avec la signature
 CREATE VIEW v_published_episodes AS
 SELECT e.id, e.program_id, e.language_code, e.kind, e.title, e.slug, e.description,
-       e.section_id, e.article_id, e.published_at, e.season, e.episode_number,
+       e.section_id, e.geo_scope, e.country_code, e.continent_code,
+       e.article_id, e.published_at, e.season, e.episode_number,
        e.duration_seconds, e.view_count, e.access_level, e.price_amount, e.price_currency,
        e.preview_seconds, e.youtube_channel_id, e.created_at, e.updated_at,
        (SELECT m.thumbnail_url FROM media_assets m WHERE m.id = e.media_id) AS thumbnail_url,
@@ -1368,6 +1470,42 @@ UNION ALL
 SELECT 'episode', e.id, e.title, e.language_code,
        e.approved_by, e.approved_at, e.scheduled_at
   FROM episodes e WHERE e.status IN ('approved', 'scheduled');
+
+-- Nom d'un continent, d'un pays ou d'une catégorie dans la langue demandée
+-- (français par défaut, anglais, ou traduction du champ `names`)
+CREATE OR REPLACE FUNCTION localized_name(p_names jsonb, p_fr text, p_en text, p_lang text)
+RETURNS text AS $$
+  SELECT COALESCE(p_names ->> p_lang, CASE WHEN p_lang = 'en' THEN p_en ELSE p_fr END);
+$$ LANGUAGE sql IMMUTABLE;
+
+-- Pays avec leur continent (formulaire de publication, filtres de l'application)
+CREATE VIEW v_countries AS
+SELECT c.code, c.name_fr, c.name_en, c.names, c.continent_code,
+       k.name_fr AS continent_name_fr, k.name_en AS continent_name_en,
+       k.position AS continent_position
+  FROM countries c
+  JOIN continents k ON k.code = c.continent_code
+ WHERE c.is_active AND k.is_active;
+
+-- Arbre complet « continent > pays » en un seul appel, dans la langue demandée :
+--   SELECT geo_tree('fr');
+--   -> [{"code":"afrique","name":"Afrique","countries":[{"code":"CD","name":"RD Congo"}, ...]}, ...]
+CREATE OR REPLACE FUNCTION geo_tree(p_lang text DEFAULT 'fr') RETURNS jsonb AS $$
+  SELECT COALESCE(jsonb_agg(
+           jsonb_build_object(
+             'code', k.code,
+             'name', localized_name(k.names, k.name_fr, k.name_en, p_lang),
+             'countries', (
+               SELECT COALESCE(jsonb_agg(
+                        jsonb_build_object('code', c.code,
+                                           'name', localized_name(c.names, c.name_fr, c.name_en, p_lang))
+                        ORDER BY localized_name(c.names, c.name_fr, c.name_en, p_lang)), '[]'::jsonb)
+                 FROM countries c
+                WHERE c.continent_code = k.code AND c.is_active))
+           ORDER BY k.position), '[]'::jsonb)
+    FROM continents k
+   WHERE k.is_active;
+$$ LANGUAGE sql STABLE;
 
 -- =====================================================================
 -- 18. RÈGLES DU CIRCUIT DE PUBLICATION (qui peut faire quoi)
