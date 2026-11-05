@@ -1,0 +1,94 @@
+{
+  "categories": [
+    {"id":"politique","name":"Politique"},
+    {"id":"economie","name":"Économie"},
+    {"id":"securite","name":"Sécurité"},
+    {"id":"sante","name":"Santé"},
+    {"id":"developpement","name":"Développement"},
+    {"id":"culture","name":"Culture"},
+    {"id":"sport","name":"Sport"}
+  ],
+  "articles": [
+    {
+      "id":"demo-001","slug":"rdc-enjeux-developpement-debat-public",
+      "title":"RDC : les grands enjeux du développement au cœur du débat public",
+      "excerpt":"Infrastructures, accès aux services et économie locale : les sujets qui dessinent les perspectives du pays.",
+      "body":["Cet article est un contenu de démonstration destiné à présenter la future expérience de lecture de Lacruche.cd. Il ne rapporte aucune annonce gouvernementale ou information récente vérifiée.","La transformation des infrastructures, l’accès à la santé et à l’éducation ainsi que le soutien aux activités locales constituent des sujets essentiels du débat public en République démocratique du Congo.","Cette première maquette permet de découvrir la place des photographies, des signatures et des rubriques. Les contenus publiés par la rédaction remplaceront ces exemples lorsque la connexion éditoriale sera en service."],
+      "category":"politique","categoryName":"Politique",
+      "cover":{"url":"https://upload.wikimedia.org/wikipedia/commons/8/82/Kinshasa_le_soir.jpg","alt":"Vue aérienne de Kinshasa au coucher du soleil","credit":"Fiston bamela · CC0 1.0","source":"https://commons.wikimedia.org/wiki/File:Kinshasa_le_soir.jpg"},
+      "author":"La rédaction · Démonstration","publishedAt":"2026-11-01T09:00:00Z","readingMinutes":3,"demo":true,"status":"published"
+    },
+    {
+      "id":"demo-002","slug":"infrastructures-relier-villes-provinces",
+      "title":"Infrastructures : relier les villes et les provinces",
+      "excerpt":"Un dossier pour comprendre le rôle des routes dans les échanges et la vie quotidienne.",
+      "body":["Contenu de démonstration : ce dossier illustre la présentation des articles et n’annonce pas le lancement de travaux.","Les axes routiers relient les bassins de production aux marchés et facilitent l’accès aux services. Leur entretien, leur financement et leur sécurité sont des questions qui concernent de nombreuses communautés.","Le futur site proposera des reportages documentés et des informations vérifiées pour suivre ces enjeux dans les provinces."],
+      "category":"developpement","categoryName":"Développement",
+      "cover":{"url":"https://upload.wikimedia.org/wikipedia/commons/9/9c/Road_Leading_to_the_Kinshasa_International_Airports.jpg","alt":"Route vers l’aéroport de Kinshasa","credit":"Rahul Tilak · CC BY-SA 4.0","source":"https://commons.wikimedia.org/wiki/File:Road_Leading_to_the_Kinshasa_International_Airports.jpg","licenseUrl":"https://creativecommons.org/licenses/by-sa/4.0/"},
+      "author":"La rédaction · Démonstration","publishedAt":"2026-11-01T08:00:00Z","readingMinutes":4,"demo":true,"status":"published"
+    },
+    {
+      "id":"demo-003","slug":"sante-acces-soins-communaute",
+      "title":"Santé : l’accès aux soins au plus près des communautés",
+      "excerpt":"Prévention, proximité et accompagnement : les repères d’une couverture sanitaire accessible.",
+      "body":["Cet exemple de démonstration ne constitue ni une actualité médicale ni un conseil de santé.","Les établissements de proximité jouent un rôle central dans la prévention et l’orientation des patients. L’accès à une information claire et aux professionnels de santé reste essentiel.","La rubrique Santé accueillera les articles validés par la rédaction, accompagnés de leurs sources."],
+      "category":"sante","categoryName":"Santé",
+      "cover":{"url":"https://upload.wikimedia.org/wikipedia/commons/7/7d/H%C3%B4pital_Heal_Africa_vue_de_fa%C3%A7ade.jpg","alt":"Façade de l’hôpital Heal Africa à Goma","credit":"Kaptainwiki · CC0 1.0","source":"https://commons.wikimedia.org/wiki/File:H%C3%B4pital_Heal_Africa_vue_de_fa%C3%A7ade.jpg"},
+      "author":"La rédaction · Démonstration","publishedAt":"2026-11-01T07:00:00Z","readingMinutes":3,"demo":true,"status":"published"
+    },
+    {
+      "id":"demo-004","slug":"securite-comprendre-defis-paix",
+      "title":"Sécurité : comprendre les défis de la paix dans les territoires",
+      "excerpt":"Les clés pour aborder les questions de protection des populations avec des sources fiables.",
+      "body":["Ce texte est un exemple de démonstration et ne signale aucun incident ou changement de situation sur le terrain.","La couverture des questions de sécurité exige des vérifications rigoureuses, le croisement des sources et une attention particulière à la protection des personnes.","Les futurs articles préciseront leur date, leurs sources et le contexte nécessaire pour comprendre les événements."],
+      "category":"securite","categoryName":"Sécurité",
+      "cover":{"url":"https://upload.wikimedia.org/wikipedia/commons/9/9c/Road_Leading_to_the_Kinshasa_International_Airports.jpg","alt":"Route à Kinshasa, photographie d’illustration","credit":"Rahul Tilak · CC BY-SA 4.0","source":"https://commons.wikimedia.org/wiki/File:Road_Leading_to_the_Kinshasa_International_Airports.jpg","licenseUrl":"https://creativecommons.org/licenses/by-sa/4.0/"},
+      "author":"La rédaction · Démonstration","publishedAt":"2026-10-31T15:00:00Z","readingMinutes":5,"demo":true,"status":"published"
+    },
+    {
+      "id":"demo-005","slug":"economie-vie-locale-kinshasa",
+      "title":"À Kinshasa, l’économie se raconte aussi au quotidien",
+      "excerpt":"Commerce, petites entreprises et mobilité urbaine : regard sur les activités qui animent la capitale.",
+      "body":["Contenu de démonstration : les informations chiffrées et témoignages seront ajoutés uniquement après vérification éditoriale.","La vie économique d’une ville se lit dans ses marchés, ses déplacements et ses petites entreprises. Ces activités relient les quartiers et contribuent aux revenus des ménages.","La rubrique Économie permettra de suivre ces sujets avec des reportages, des analyses et des données sourcées."],
+      "category":"economie","categoryName":"Économie",
+      "cover":{"url":"https://upload.wikimedia.org/wikipedia/commons/8/82/Kinshasa_le_soir.jpg","alt":"Kinshasa au coucher du soleil","credit":"Fiston bamela · CC0 1.0","source":"https://commons.wikimedia.org/wiki/File:Kinshasa_le_soir.jpg"},
+      "author":"La rédaction · Démonstration","publishedAt":"2026-10-31T11:00:00Z","readingMinutes":4,"demo":true,"status":"published"
+    },
+    {
+      "id":"demo-006","slug":"agriculture-initiatives-communautaires",
+      "title":"Agriculture : le rôle des initiatives communautaires",
+      "excerpt":"La production locale, un fil conducteur pour explorer les enjeux du développement rural.",
+      "body":["Cet article de démonstration accompagne une photographie d’illustration et ne présente pas un projet récemment annoncé.","Les initiatives agricoles communautaires peuvent faciliter le partage des connaissances, l’organisation de la production et l’accès aux marchés.","Le suivi de ces expériences demandera des reportages de terrain et une présentation claire des résultats et de leurs limites."],
+      "category":"developpement","categoryName":"Développement",
+      "cover":{"url":"https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f6/Growing_as_a_community_in_rural_DR_Congo_%287609967072%29.jpg/1280px-Growing_as_a_community_in_rural_DR_Congo_%287609967072%29.jpg","alt":"Travail agricole communautaire près de Masi-Manimba en RDC","credit":"Russell Watkins / DFID · CC BY-SA 2.0","source":"https://commons.wikimedia.org/wiki/File:Growing_as_a_community_in_rural_DR_Congo_(7609967072).jpg","licenseUrl":"https://creativecommons.org/licenses/by-sa/2.0/"},
+      "author":"La rédaction · Démonstration","publishedAt":"2026-10-30T13:00:00Z","readingMinutes":4,"demo":true,"status":"published"
+    },
+    {
+      "id":"demo-007","slug":"culture-danse-patrimoine-vivant",
+      "title":"Danse et création : un patrimoine congolais vivant",
+      "excerpt":"Les expressions artistiques occupent une place centrale dans la transmission culturelle.",
+      "body":["Ce contenu de démonstration présente la future rubrique Culture. Il n’annonce aucun spectacle ou événement.","La danse, la musique et la création contemporaine racontent des histoires, transmettent des savoirs et réunissent des générations.","Des portraits, entretiens et agendas vérifiés enrichiront cette rubrique lors de sa mise en service éditoriale."],
+      "category":"culture","categoryName":"Culture",
+      "cover":{"url":"https://upload.wikimedia.org/wikipedia/commons/1/1b/Danseurs_du_ballet_traditionnel.jpg","alt":"Danseurs de ballet traditionnel à Kinshasa","credit":"B.N. Mara · CC BY-SA 4.0","source":"https://commons.wikimedia.org/wiki/File:Danseurs_du_ballet_traditionnel.jpg","licenseUrl":"https://creativecommons.org/licenses/by-sa/4.0/"},
+      "author":"La rédaction · Démonstration","publishedAt":"2026-10-30T10:00:00Z","readingMinutes":3,"demo":true,"status":"published"
+    },
+    {
+      "id":"demo-008","slug":"sport-lieux-rassemblent-supporters",
+      "title":"Sport : ces lieux qui rassemblent les supporters",
+      "excerpt":"Stades, clubs et pratiques locales : une fenêtre sur la culture sportive congolaise.",
+      "body":["Exemple de démonstration : ce texte ne rapporte aucun résultat de match ni annonce de compétition.","Les enceintes sportives sont des espaces de rencontre et de passion collective. Les clubs et associations participent aussi à la pratique sportive de proximité.","La rubrique Sport proposera des résultats et des calendriers lorsque des sources éditoriales vérifiées seront connectées."],
+      "category":"sport","categoryName":"Sport",
+      "cover":{"url":"https://upload.wikimedia.org/wikipedia/commons/1/1a/SDM_Kinshasa.jpg","alt":"Stade des Martyrs à Kinshasa","credit":"Fiston bamela · CC0 1.0","source":"https://commons.wikimedia.org/wiki/File:SDM_Kinshasa.jpg"},
+      "author":"La rédaction · Démonstration","publishedAt":"2026-10-29T16:00:00Z","readingMinutes":3,"demo":true,"status":"published"
+    }
+  ],
+  "media": [
+    {"id":"demo-video-001","slug":"reportages-a-venir","title":"Les reportages de Lacruche.cd","type":"video","description":"Les vidéos de la rédaction apparaîtront ici après publication et configuration de leur source.","cover":{"url":"https://upload.wikimedia.org/wikipedia/commons/8/82/Kinshasa_le_soir.jpg","alt":"Kinshasa au coucher du soleil"},"durationSeconds":null,"playbackUrl":null,"status":"unconfigured","publicationStatus":"published","publishedAt":"2026-11-01T08:00:00Z","demo":true},
+    {"id":"demo-audio-001","slug":"rendez-vous-audio-a-venir","title":"Les rendez-vous audio","type":"audio","description":"Un espace préparé pour les podcasts et émissions audio. Aucun enregistrement n’est encore connecté.","cover":{"url":"https://upload.wikimedia.org/wikipedia/commons/8/82/Kinshasa_le_soir.jpg","alt":"Kinshasa au coucher du soleil"},"durationSeconds":null,"playbackUrl":null,"status":"unconfigured","publicationStatus":"published","publishedAt":"2026-11-01T07:00:00Z","demo":true}
+  ],
+  "channels": [
+    {"id":"lacruche-tv","name":"Lacruche TV","type":"tv","description":"Le lecteur TV accueillera un flux autorisé lorsqu’il sera configuré.","logo":null,"status":"unconfigured","streams":[],"playbackUrl":null,"demo":true},
+    {"id":"radios-partenaires","name":"Radios partenaires","type":"radio","description":"Les stations et leurs flux audio seront ajoutés après connexion des partenaires.","logo":null,"status":"unconfigured","streams":[],"playbackUrl":null,"demo":true},
+    {"id":"tnt-partenaires","name":"Chaînes TNT partenaires","type":"tnt","description":"Emplacement prévu pour les chaînes TNT et leur guide des programmes.","logo":null,"status":"unconfigured","streams":[],"playbackUrl":null,"demo":true}
+  ]
+}
