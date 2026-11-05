@@ -1,0 +1,56 @@
+[
+  {
+    "key": "city",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/8/82/Kinshasa_le_soir.jpg",
+    "source": "https://commons.wikimedia.org/wiki/File:Kinshasa_le_soir.jpg",
+    "author": "Fiston bamela",
+    "license": "CC0 1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "alt": "Vue aérienne de Kinshasa au coucher du soleil"
+  },
+  {
+    "key": "road",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/9/9c/Road_Leading_to_the_Kinshasa_International_Airports.jpg",
+    "source": "https://commons.wikimedia.org/wiki/File:Road_Leading_to_the_Kinshasa_International_Airports.jpg",
+    "author": "Rahul Tilak",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "alt": "Route et panneau de direction vers l’aéroport de Kinshasa"
+  },
+  {
+    "key": "health",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/7/7d/H%C3%B4pital_Heal_Africa_vue_de_fa%C3%A7ade.jpg",
+    "source": "https://commons.wikimedia.org/wiki/File:H%C3%B4pital_Heal_Africa_vue_de_fa%C3%A7ade.jpg",
+    "author": "Kaptainwiki",
+    "license": "CC0 1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "alt": "Façade de l’hôpital Heal Africa à Goma"
+  },
+  {
+    "key": "culture",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/1/1b/Danseurs_du_ballet_traditionnel.jpg",
+    "source": "https://commons.wikimedia.org/wiki/File:Danseurs_du_ballet_traditionnel.jpg",
+    "author": "B.N. Mara",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "alt": "Danseurs de ballet traditionnel à Kinshasa"
+  },
+  {
+    "key": "sport",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/1/1a/SDM_Kinshasa.jpg",
+    "source": "https://commons.wikimedia.org/wiki/File:SDM_Kinshasa.jpg",
+    "author": "Fiston bamela",
+    "license": "CC0 1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "alt": "Stade des Martyrs à Kinshasa"
+  },
+  {
+    "key": "development",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f6/Growing_as_a_community_in_rural_DR_Congo_%287609967072%29.jpg/1280px-Growing_as_a_community_in_rural_DR_Congo_%287609967072%29.jpg",
+    "source": "https://commons.wikimedia.org/wiki/File:Growing_as_a_community_in_rural_DR_Congo_(7609967072).jpg",
+    "author": "Russell Watkins/Department for International Development",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+    "alt": "Travail agricole communautaire près de Masi-Manimba en RDC"
+  }
+]

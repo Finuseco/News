@@ -1,0 +1,12 @@
+{
+  "name": "lacruche-news-web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Prototype web responsive et API de lecture Lacruche.cd",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "start": "node server/index.js",
+    "test": "node --test"
+  }
+}
